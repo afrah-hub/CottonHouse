@@ -50,7 +50,7 @@ const Navbar = () => {
         {/* Left Section: Logo */}
         <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
           <span className={`text-base sm:text-lg font-bold tracking-[7px] uppercase transition-colors duration-500 ${
-            isTransparent || theme === 'dark' ? 'text-white' : 'text-slate-900'
+            theme === 'dark' ? 'text-white' : 'text-slate-900'
           }`}>
             COTTONHOUSE
           </span>
@@ -76,7 +76,7 @@ const Navbar = () => {
                 key={link.name}
                 {...linkProps}
                 className={`relative text-[10px] sm:text-[11px] font-bold uppercase tracking-[2.5px] transition-colors duration-500 py-1.5 group ${
-                  isTransparent || theme === 'dark' ? 'text-white/80 hover:text-[#3B82F6]' : 'text-slate-700 hover:text-[#3B82F6]'
+                  theme === 'dark' ? 'text-white/80 hover:text-[#3B82F6]' : 'text-slate-700 hover:text-[#3B82F6]'
                 }`}
               >
                 {link.name}
@@ -97,13 +97,13 @@ const Navbar = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={`w-full border rounded-full py-1.5 pl-4 pr-10 text-xs transition-all duration-500 backdrop-blur-md focus:outline-none focus:border-[#3B82F6]/50 ${
-                isTransparent || theme === 'dark'
+                theme === 'dark'
                   ? 'bg-white/5 border-white/10 text-white placeholder-white/40 focus:bg-white/10'
                   : 'bg-slate-200/50 border-slate-300 text-slate-800 placeholder-slate-400 focus:bg-white'
               }`}
             />
             <button id="nav-search-button" type="submit" className={`absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors ${
-              isTransparent || theme === 'dark' ? 'text-white/60 hover:text-white' : 'text-slate-500 hover:text-slate-800'
+              theme === 'dark' ? 'text-white/60 hover:text-white' : 'text-slate-500 hover:text-slate-800'
             }`}>
               <FiSearch size={14} />
             </button>
@@ -115,7 +115,7 @@ const Navbar = () => {
             <Link 
               to="/wishlist" 
               className={`relative p-1.5 hover:scale-110 transition-all duration-300 ${
-                isTransparent || theme === 'dark' ? 'text-white hover:text-white' : 'text-slate-700 hover:text-[#3B82F6]'
+                theme === 'dark' ? 'text-white hover:text-white' : 'text-slate-700 hover:text-[#3B82F6]'
               }`}
               style={{ filter: 'drop-shadow(0 0 0px rgba(255,255,255,0))' }}
               onMouseEnter={(e) => {
@@ -139,7 +139,7 @@ const Navbar = () => {
             <Link 
               to="/cart" 
               className={`relative p-1.5 hover:scale-110 transition-all duration-300 ${
-                isTransparent || theme === 'dark' ? 'text-white hover:text-white' : 'text-slate-700 hover:text-[#3B82F6]'
+                theme === 'dark' ? 'text-white hover:text-white' : 'text-slate-700 hover:text-[#3B82F6]'
               }`}
               style={{ filter: 'drop-shadow(0 0 0px rgba(255,255,255,0))' }}
               onMouseEnter={(e) => {
@@ -163,7 +163,7 @@ const Navbar = () => {
             <button
               onClick={toggleTheme}
               className={`p-1.5 hover:scale-110 transition-all duration-300 ${
-                isTransparent || theme === 'dark' ? 'text-white' : 'text-slate-700 hover:text-[#3B82F6]'
+                theme === 'dark' ? 'text-white' : 'text-slate-700 hover:text-[#3B82F6]'
               }`}
               style={{ filter: 'drop-shadow(0 0 0px rgba(255,255,255,0))' }}
               onMouseEnter={(e) => {
@@ -183,12 +183,12 @@ const Navbar = () => {
           {/* User profile / Sign In */}
           {user ? (
             <div className={`flex items-center gap-3 border-l pl-4 ${
-              isTransparent || theme === 'dark' ? 'border-white/10' : 'border-slate-200'
+              theme === 'dark' ? 'border-white/10' : 'border-slate-200'
             }`}>
               <Link 
                 to="/profile" 
                 className={`flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider hover:scale-105 transition-all duration-300 ${
-                  isTransparent || theme === 'dark' ? 'text-white' : 'text-slate-800 hover:text-[#3B82F6]'
+                  theme === 'dark' ? 'text-white' : 'text-slate-800 hover:text-[#3B82F6]'
                 }`}
                 style={{ filter: 'drop-shadow(0 0 0px rgba(255,255,255,0))' }}
                 onMouseEnter={(e) => {
@@ -212,7 +212,7 @@ const Navbar = () => {
                 id="btn-logout"
                 onClick={logout} 
                 className={`p-1.5 transition-colors ${
-                  isTransparent || theme === 'dark' ? 'text-white/50 hover:text-red-500' : 'text-slate-400 hover:text-red-650'
+                  theme === 'dark' ? 'text-white/50 hover:text-red-500' : 'text-slate-400 hover:text-red-650'
                 }`}
                 title="Logout"
               >
@@ -223,7 +223,7 @@ const Navbar = () => {
             <Link 
               to="/login" 
               className={`text-[10px] font-bold uppercase tracking-[0.18em] border border-[#3B82F6] bg-transparent px-6 py-2.5 rounded-full transition-all duration-300 hover:scale-[1.03] ${
-                isTransparent || theme === 'dark'
+                theme === 'dark'
                   ? 'text-white hover:shadow-[0_0_15px_rgba(59,130,246,0.6)] hover:border-blue-400'
                   : 'text-[#3B82F6] hover:bg-[#3B82F6] hover:text-white hover:shadow-[0_4px_12px_rgba(59,130,246,0.2)]'
               }`}
@@ -238,14 +238,14 @@ const Navbar = () => {
           <button
             onClick={toggleTheme}
             className={`p-1.5 transition-transform hover:scale-105 ${
-              isTransparent || theme === 'dark' ? 'text-white' : 'text-slate-700'
+              theme === 'dark' ? 'text-white' : 'text-slate-700'
             }`}
           >
             {theme === 'dark' ? <FiSun size={18} /> : <FiMoon size={18} />}
           </button>
 
           <Link to="/cart" className={`relative p-1.5 ${
-            isTransparent || theme === 'dark' ? 'text-white' : 'text-slate-700'
+            theme === 'dark' ? 'text-white' : 'text-slate-700'
           }`}>
             <FiShoppingCart size={18} />
             {cartCount > 0 && (
