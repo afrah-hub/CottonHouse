@@ -131,111 +131,41 @@ const Home = () => {
       ══════════════════════════════════════════ */}
       <header
         id="hero-section"
-        className="hero-root relative w-full overflow-hidden transition-colors duration-500 bg-[#05070B]"
+        className="hero-root relative w-full overflow-hidden"
         style={{ height: '100vh', minHeight: '600px' }}
       >
+        {/* Dark Hero Image */}
         <div
-          className="hero-bg-layer absolute top-0 right-0 h-full w-full"
+          className="hero-bg-layer absolute top-0 right-0 h-full w-full pointer-events-none"
           style={{
-            backgroundImage: "url('/hero-bg-original.jpg')",
+            backgroundImage: "url('/hero-dark.webp')",
             backgroundSize: 'cover',
-            backgroundPosition: 'right center',
+            backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             animation: 'kenburns 28s ease-in-out infinite alternate',
+            opacity: theme === 'dark' ? 1 : 0,
+            zIndex: theme === 'dark' ? 2 : 1,
+            transition: 'opacity 450ms ease-in-out, filter 450ms ease-in-out',
+          }}
+        />
+
+        {/* Light Hero Image */}
+        <div
+          className="hero-bg-layer absolute top-0 right-0 h-full w-full pointer-events-none"
+          style={{
+            backgroundImage: "url('/hero-light.webp')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            animation: 'kenburns 28s ease-in-out infinite alternate',
+            opacity: theme === 'light' ? 1 : 0,
+            zIndex: theme === 'light' ? 2 : 1,
+            transition: 'opacity 450ms ease-in-out, filter 450ms ease-in-out',
           }}
         />
 
         {/* ── Theme-aware gradient overlay ── */}
         <div className="hero-overlay absolute inset-0 pointer-events-none" />
-
-        {/* ── Left-aligned hero content ── */}
-        <div
-          className="hero-content-wrapper relative z-10 h-full flex flex-col justify-center max-w-full lg:max-w-[50%]"
-          style={{
-            paddingLeft: 'clamp(24px, 8vw, 140px)',
-            paddingRight: '24px',
-          }}
-        >
-          {/* Pre-heading small text */}
-          <div className="hero-animate-1 flex items-center gap-4 mb-4">
-            <span
-              className="hero-label text-[12px] font-semibold tracking-[0.3em] uppercase text-gray-300"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              Premium Men's Fashion
-            </span>
-            <span className="h-[2px] w-12 bg-blue-500" />
-          </div>
-
-          {/* Main heading and side-text column */}
-          <div className="hero-animate-2 mt-4 flex flex-col items-start select-none">
-            <h1
-              className="hero-heading-denim font-bebas leading-[0.8] tracking-[0.02em]"
-              style={{ fontSize: 'clamp(4.5rem, 11vw, 9.5rem)' }}
-            >
-              COTTON
-            </h1>
-            <div className="flex items-end gap-6 mt-1">
-              <h1
-                className="hero-heading-denim font-bebas leading-[0.8] tracking-[0.02em]"
-                style={{ fontSize: 'clamp(4.5rem, 11vw, 9.5rem)' }}
-              >
-                HOUSE
-              </h1>
-              
-              <div className="flex flex-col text-[10px] sm:text-[11px] tracking-[0.25em] uppercase font-bold text-blue-600 dark:text-blue-400 leading-[1.4] mb-[15px] sm:mb-[20px] md:mb-[25px]">
-                <span>Men's</span>
-                <span>Fashion &amp;</span>
-                <span>Clothing</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Tagline */}
-          <div className="hero-animate-3 mt-6 flex items-center gap-4">
-            <p
-              className="hero-tagline text-[13px] font-semibold tracking-[0.25em] uppercase text-gray-300"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              Feel Classy, Be Massy
-            </p>
-            <span className="h-[2px] w-12 bg-blue-500" />
-          </div>
-
-          {/* Description */}
-          <div className="hero-animate-4 mt-4">
-            <p
-              className="hero-desc text-sm font-light leading-relaxed max-w-sm text-gray-400"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              Premium quality fabrics. Modern fits.<br />
-              Timeless style for every occasion.
-            </p>
-          </div>
-
-          {/* Buttons (Commented out to match mockup exactly) */}
-          {/*
-          <div className="hero-animate-5 flex items-center gap-4 mt-8 flex-wrap">
-            <Link
-              id="btn-hero-shop-collection"
-              to="/products"
-              className="hero-btn-primary group flex items-center gap-2 text-white bg-gradient-to-r from-blue-600 to-indigo-650 px-8 py-3.5 rounded-lg text-xs font-bold tracking-widest uppercase hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-350"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              Shop Collection
-              <FiArrowRight size={13} className="group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
-            <Link
-              id="btn-hero-explore-styles"
-              to="/products"
-              className="hero-btn-secondary border border-slate-750 text-slate-300 hover:text-white hover:border-slate-500 bg-slate-900/40 backdrop-blur-sm px-8 py-3.5 rounded-lg text-xs font-bold tracking-widest uppercase transition-all duration-350"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              Explore Styles
-            </Link>
-          </div>
-          */}
-        </div>
 
         {/* ── Scroll-down indicator ── */}
         <a

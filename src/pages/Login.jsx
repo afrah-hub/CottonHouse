@@ -33,21 +33,21 @@ const Login = () => {
 
   return (
     <div className="min-h-[75vh] flex items-center justify-center px-4 py-12">
-      
+
       <div className="w-full max-w-md flex flex-col gap-6">
-        
+
         <div className="flex flex-col gap-2 text-center">
           <h1 className="text-3xl font-extrabold text-slate-100 uppercase tracking-tight">Welcome Back</h1>
           <p className="text-xs text-slate-500">Sign in to browse collections and manage your purchases</p>
         </div>
 
         <div className="glass-card border border-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-          
+
           {/* Decorative glowing gradient blur */}
           <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5 relative z-10">
-            
+
             {error && (
               <div className="bg-red-950/40 border border-red-900/30 text-red-400 text-xs font-semibold px-4 py-2.5 rounded-xl">
                 {error}
