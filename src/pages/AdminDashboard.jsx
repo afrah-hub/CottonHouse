@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import { uploadImageToCloudinary } from '../services/cloudinary';
 import { useAuth } from '../context/AuthContext';
-import { FiUsers, FiBox, FiShoppingBag, FiDollarSign, FiPlus, FiEdit, FiTrash, FiEye, FiLoader, FiCheckCircle } from 'react-icons/fi';
+import { FiUsers, FiBox, FiShoppingBag, FiDollarSign, FiPlus, FiEdit, FiTrash, FiEye, FiLoader, FiCheckCircle, FiUploadCloud, FiX, FiImage } from 'react-icons/fi';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -21,6 +22,8 @@ const AdminDashboard = () => {
     name: '', description: '', price: 0, stock: 0, size: '', color: '', brand: '', categoryId: '', imageUrl: ''
   });
   const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const [newCatName, setNewCatName] = useState('');
   const [editingCat, setEditingCat] = useState(null);
@@ -58,35 +61,47 @@ const AdminDashboard = () => {
   // Product Actions
   const handleProductSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('name', productForm.name);
-    formData.append('description', productForm.description);
-    formData.append('price', productForm.price);
-    formData.append('stock', productForm.stock);
-    formData.append('size', productForm.size);
-    formData.append('color', productForm.color);
-    formData.append('brand', productForm.brand);
-    formData.append('categoryId', productForm.categoryId);
-    formData.append('imageUrl', productForm.imageUrl);
 
+    let finalImageUrl = productForm.imageUrl;
+
+    // If a local file was chosen, upload it to Cloudinary first
     if (imageFile) {
-      formData.append('imageFile', imageFile);
+      setUploadingImage(true);
+      try {
+        finalImageUrl = await uploadImageToCloudinary(imageFile);
+      } catch (uploadErr) {
+        console.error('Cloudinary upload failed:', uploadErr);
+        alert(`Image upload failed: ${uploadErr.message}`);
+        setUploadingImage(false);
+        return;
+      }
+      setUploadingImage(false);
     }
+
+    // Send JSON to the backend — no multipart needed anymore
+    const payload = {
+      name: productForm.name,
+      description: productForm.description,
+      price: productForm.price,
+      stock: productForm.stock,
+      size: productForm.size,
+      color: productForm.color,
+      brand: productForm.brand,
+      categoryId: productForm.categoryId,
+      imageUrl: finalImageUrl,
+    };
 
     try {
       if (editingProduct) {
-        await api.put(`/admin/products/${editingProduct.productId}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.put(`/admin/products/${editingProduct.productId}`, payload);
         alert("Product updated!");
       } else {
-        await api.post('/admin/products', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.post('/admin/products', payload);
         alert("Product added!");
       }
       setShowProductModal(false);
       setImageFile(null);
+      setImagePreview(null);
       setEditingProduct(null);
       await loadData();
     } catch (err) {
@@ -101,6 +116,7 @@ const AdminDashboard = () => {
       name: '', description: '', price: 0, stock: 10, size: 'S,M,L,XL', color: 'Black', brand: '', categoryId: categories[0]?.categoryId || '', imageUrl: ''
     });
     setImageFile(null);
+    setImagePreview(null);
     setShowProductModal(true);
   };
 
@@ -118,6 +134,7 @@ const AdminDashboard = () => {
       imageUrl: prod.imageUrl
     });
     setImageFile(null);
+    setImagePreview(prod.imageUrl || null);
     setShowProductModal(true);
   };
 
@@ -655,28 +672,85 @@ const AdminDashboard = () => {
                 />
               </div>
 
-              {/* Image Source Selection */}
-              <div className="grid grid-cols-1 gap-4 border-t border-slate-900 pt-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-bold text-indigo-400 uppercase tracking-widest">Upload Product Image (Cloudinary)</label>
+              {/* Image Upload — Cloudinary */}
+              <div className="flex flex-col gap-3 border-t border-slate-900 pt-4">
+                <label className="font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
+                  <FiUploadCloud size={14} />
+                  Product Image
+                </label>
+
+                {/* Dropzone / file picker */}
+                <label
+                  htmlFor="modal-prod-image-file"
+                  className="relative flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-800 hover:border-indigo-500 rounded-xl p-4 cursor-pointer transition-colors bg-slate-900/40"
+                >
+                  {imagePreview ? (
+                    <>
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full max-h-36 object-contain rounded-lg"
+                      />
+                      <span className="text-[10px] text-slate-500">Click to change image</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiImage size={28} className="text-slate-600" />
+                      <span className="text-xs text-slate-500 text-center">
+                        Click to pick an image<br />
+                        <span className="text-[10px] text-slate-600">PNG, JPG, WEBP — uploaded to Cloudinary</span>
+                      </span>
+                    </>
+                  )}
                   <input
                     id="modal-prod-image-file"
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setImageFile(e.target.files[0])}
-                    className="text-slate-400 file:bg-slate-900 file:text-indigo-400 file:border-slate-800 file:rounded-xl file:px-3 file:py-1.5 file:mr-4 file:cursor-pointer file:hover:bg-slate-950 file:transition-colors text-xs cursor-pointer border border-slate-850 rounded-xl p-2"
+                    className="sr-only"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+                      setImageFile(file);
+                      setImagePreview(URL.createObjectURL(file));
+                      // Clear the manual URL if a file is chosen
+                      setProductForm(prev => ({ ...prev, imageUrl: '' }));
+                    }}
                   />
+                </label>
+
+                {/* Clear selection */}
+                {imageFile && (
+                  <button
+                    type="button"
+                    onClick={() => { setImageFile(null); setImagePreview(editingProduct?.imageUrl || null); }}
+                    className="flex items-center gap-1 text-[10px] text-red-400 hover:text-red-300 self-start"
+                  >
+                    <FiX size={11} /> Remove selected file
+                  </button>
+                )}
+
+                {/* Divider */}
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-px bg-slate-800" />
+                  <span className="text-[10px] text-slate-600 uppercase tracking-wider">or paste URL</span>
+                  <div className="flex-1 h-px bg-slate-800" />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-bold text-slate-500 uppercase tracking-widest" htmlFor="modal-prod-image-url">Or Image URL</label>
-                  <input
-                    id="modal-prod-image-url"
-                    type="text"
-                    value={productForm.imageUrl}
-                    onChange={(e) => setProductForm({ ...productForm, imageUrl: e.target.value })}
-                    className="bg-slate-900 border border-slate-850 rounded-xl p-2.5 text-slate-300 focus:outline-none"
-                  />
-                </div>
+
+                {/* Manual URL fallback */}
+                <input
+                  id="modal-prod-image-url"
+                  type="text"
+                  value={productForm.imageUrl}
+                  onChange={(e) => {
+                    setProductForm({ ...productForm, imageUrl: e.target.value });
+                    if (e.target.value) {
+                      setImageFile(null);
+                      setImagePreview(e.target.value);
+                    }
+                  }}
+                  placeholder="https://example.com/image.jpg"
+                  className="bg-slate-900 border border-slate-850 rounded-xl p-2.5 text-slate-300 focus:outline-none text-xs placeholder-slate-600"
+                />
               </div>
 
               {/* Buttons */}
@@ -684,14 +758,19 @@ const AdminDashboard = () => {
                 <button
                   id="btn-admin-modal-submit"
                   type="submit"
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-all shadow-md"
+                  disabled={uploadingImage}
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
                 >
-                  Save Product
+                  {uploadingImage ? (
+                    <><FiLoader className="animate-spin" size={13} /><span>Uploading...</span></>
+                  ) : (
+                    <span>Save Product</span>
+                  )}
                 </button>
                 <button
                   id="btn-admin-modal-close"
                   type="button"
-                  onClick={() => { setShowProductModal(false); setImageFile(null); }}
+                  onClick={() => { setShowProductModal(false); setImageFile(null); setImagePreview(null); }}
                   className="flex-1 bg-slate-900 border border-slate-850 text-slate-300 font-bold py-3 rounded-xl transition-all"
                 >
                   Cancel
