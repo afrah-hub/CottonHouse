@@ -131,46 +131,17 @@ const Home = () => {
       ══════════════════════════════════════════ */}
       <header
         id="hero-section"
-        className="hero-root relative w-full overflow-hidden"
-        style={{ height: '100vh', minHeight: '600px' }}
+        className="w-full relative overflow-hidden bg-cover bg-center bg-[#F7F2EC]"
+        style={{
+          height: '100vh',
+          minHeight: '600px',
+          backgroundImage: "url('/hero-light.webp')"
+        }}
       >
-        {/* Dark Hero Image */}
-        <div
-          className="hero-bg-layer absolute top-0 right-0 h-full w-full pointer-events-none"
-          style={{
-            backgroundImage: "url('/hero-dark.webp')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            animation: 'kenburns 28s ease-in-out infinite alternate',
-            opacity: theme === 'dark' ? 1 : 0,
-            zIndex: theme === 'dark' ? 2 : 1,
-            transition: 'opacity 450ms ease-in-out, filter 450ms ease-in-out',
-          }}
-        />
-
-        {/* Light Hero Image */}
-        <div
-          className="hero-bg-layer absolute top-0 right-0 h-full w-full pointer-events-none"
-          style={{
-            backgroundImage: "url('/hero-light.webp')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            animation: 'kenburns 28s ease-in-out infinite alternate',
-            opacity: theme === 'light' ? 1 : 0,
-            zIndex: theme === 'light' ? 2 : 1,
-            transition: 'opacity 450ms ease-in-out, filter 450ms ease-in-out',
-          }}
-        />
-
-        {/* ── Theme-aware gradient overlay ── */}
-        <div className="hero-overlay absolute inset-0 pointer-events-none" />
-
-        {/* ── Scroll-down indicator ── */}
+        {/* Scroll-down indicator */}
         <a
           href="#trust-section"
-          className="hero-animate-6 absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 hover:opacity-80 transition-opacity cursor-pointer"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 hover:opacity-80 transition-opacity cursor-pointer"
           aria-label="Scroll down"
         >
           <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-slate-500">Scroll</span>
