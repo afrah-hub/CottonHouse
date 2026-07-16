@@ -10,6 +10,7 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
+import CategoryPage from './pages/CategoryPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Cart from './pages/Cart';
@@ -18,6 +19,7 @@ import Orders from './pages/Orders';
 import OrderSuccess from './pages/OrderSuccess';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
+
 
 // Route Guards
 const ProtectedRoute = ({ children }) => {
@@ -53,6 +55,9 @@ const AppContent = () => {
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/categories" element={<CategoryPage />} />
+          <Route path="/categories/:categorySlug" element={<CategoryPage />} />
+
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 

@@ -19,7 +19,7 @@ const AdminDashboard = () => {
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [productForm, setProductForm] = useState({
-    name: '', description: '', price: 0, stock: 0, size: '', color: '', brand: '', categoryId: '', imageUrl: ''
+    name: '', description: '', price: 0, stock: 0, size: '', color: '', brand: '', categoryId: '', subCategoryId: '', imageUrl: ''
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -27,6 +27,11 @@ const AdminDashboard = () => {
 
   const [newCatName, setNewCatName] = useState('');
   const [editingCat, setEditingCat] = useState(null);
+  
+  // Subcategory management state
+  const [subCategories, setSubCategories] = useState([]);
+  const [newSubCatName, setNewSubCatName] = useState('');
+  const [newSubCatParentId, setNewSubCatParentId] = useState('');
 
   // Load Admin Data
   const loadData = async () => {
@@ -44,6 +49,9 @@ const AdminDashboard = () => {
       const categoriesRes = await api.get('/categories');
       const filteredCategories = categoriesRes.data.filter(cat => allowedCategories.includes(cat.categoryName));
       setCategories(filteredCategories);
+
+      const subCategoriesRes = await api.get('/subcategories');
+      setSubCategories(subCategoriesRes.data);
 
       const ordersRes = await api.get('/admin/orders');
       setOrders(ordersRes.data);
@@ -64,13 +72,18 @@ const AdminDashboard = () => {
 
     let finalImageUrl = productForm.imageUrl;
 
-    // If a local file was chosen, upload it to Cloudinary first
+    // If a local file was chosen, upload it to our backend upload API
     if (imageFile) {
       setUploadingImage(true);
       try {
-        finalImageUrl = await uploadImageToCloudinary(imageFile);
+        const formData = new FormData();
+        formData.append('files', imageFile);
+        const uploadRes = await api.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        finalImageUrl = uploadRes.data.imageUrl;
       } catch (uploadErr) {
-        console.error('Cloudinary upload failed:', uploadErr);
+        console.error('Upload failed:', uploadErr);
         alert(`Image upload failed: ${uploadErr.message}`);
         setUploadingImage(false);
         return;
@@ -88,6 +101,7 @@ const AdminDashboard = () => {
       color: productForm.color,
       brand: productForm.brand,
       categoryId: productForm.categoryId,
+      subCategoryId: productForm.subCategoryId ? parseInt(productForm.subCategoryId) : null,
       imageUrl: finalImageUrl,
     };
 
@@ -113,7 +127,7 @@ const AdminDashboard = () => {
   const openAddProduct = () => {
     setEditingProduct(null);
     setProductForm({
-      name: '', description: '', price: 0, stock: 10, size: 'S,M,L,XL', color: 'Black', brand: '', categoryId: categories[0]?.categoryId || '', imageUrl: ''
+      name: '', description: '', price: 0, stock: 10, size: 'S,M,L,XL', color: 'Black', brand: '', categoryId: categories[0]?.categoryId || '', subCategoryId: '', imageUrl: ''
     });
     setImageFile(null);
     setImagePreview(null);
@@ -131,6 +145,7 @@ const AdminDashboard = () => {
       color: prod.color,
       brand: prod.brand,
       categoryId: prod.categoryId,
+      subCategoryId: prod.subCategoryId || '',
       imageUrl: prod.imageUrl
     });
     setImageFile(null);
@@ -182,6 +197,25 @@ const AdminDashboard = () => {
       alert("Failed to delete category.");
     }
   };
+
+  // Subcategory Actions
+  const handleAddSubCategory = async (e) => {
+    e.preventDefault();
+    if (!newSubCatName.trim() || !newSubCatParentId) return;
+    try {
+      await api.post('/admin/subcategories', {
+        name: newSubCatName.trim(),
+        categoryId: parseInt(newSubCatParentId)
+      });
+      setNewSubCatName('');
+      await loadData();
+      alert("Subcategory created!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add subcategory.");
+    }
+  };
+
 
   // Order Actions
   const handleOrderStatusChange = async (orderId, newStatus) => {
@@ -425,23 +459,64 @@ const AdminDashboard = () => {
                   </div>
                 </form>
               ) : (
-                <form onSubmit={handleAddCategory} className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest" htmlFor="cat-add-name-input">Category Name</label>
-                    <input
-                      id="cat-add-name-input"
-                      type="text"
-                      placeholder="e.g. Traditional Wear"
-                      value={newCatName}
-                      onChange={(e) => setNewCatName(e.target.value)}
-                      className="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-300 focus:outline-none"
-                    />
+                <div className="flex flex-col gap-6">
+                  <form onSubmit={handleAddCategory} className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest" htmlFor="cat-add-name-input">Category Name</label>
+                      <input
+                        id="cat-add-name-input"
+                        type="text"
+                        placeholder="e.g. Traditional Wear"
+                        value={newCatName}
+                        onChange={(e) => setNewCatName(e.target.value)}
+                        className="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-300 focus:outline-none"
+                      />
+                    </div>
+                    <button id="btn-cat-add-submit" type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1">
+                      <FiPlus />
+                      <span>Create Category</span>
+                    </button>
+                  </form>
+
+                  <div className="border-t border-slate-900 pt-4 flex flex-col gap-4">
+                    <h3 className="text-base font-bold text-slate-300 uppercase tracking-wider border-b border-slate-900 pb-2">
+                      Add Subcategory
+                    </h3>
+                    <form onSubmit={handleAddSubCategory} className="flex flex-col gap-4">
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest" htmlFor="subcat-parent-select">Category</label>
+                        <select
+                          id="subcat-parent-select"
+                          value={newSubCatParentId}
+                          onChange={(e) => setNewSubCatParentId(e.target.value)}
+                          className="bg-slate-900 border border-slate-850 rounded-xl p-2.5 text-xs text-slate-300 focus:outline-none"
+                          required
+                        >
+                          <option value="">Select Category</option>
+                          {categories.map(c => (
+                            <option key={c.categoryId} value={c.categoryId}>{c.categoryName}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest" htmlFor="subcat-add-name-input">Subcategory Name</label>
+                        <input
+                          id="subcat-add-name-input"
+                          type="text"
+                          placeholder="e.g. Formal Shirts"
+                          value={newSubCatName}
+                          onChange={(e) => setNewSubCatName(e.target.value)}
+                          className="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-300 focus:outline-none"
+                          required
+                        />
+                      </div>
+                      <button id="btn-subcat-add-submit" type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1">
+                        <FiPlus />
+                        <span>Create Subcategory</span>
+                      </button>
+                    </form>
                   </div>
-                  <button id="btn-cat-add-submit" type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1">
-                    <FiPlus />
-                    <span>Create Category</span>
-                  </button>
-                </form>
+                </div>
               )}
             </div>
 
@@ -577,9 +652,9 @@ const AdminDashboard = () => {
                 />
               </div>
 
-              {/* Brand & Category Row */}
+              {/* Brand, Category & SubCategory Section */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1.5 col-span-2">
                   <label className="font-bold text-slate-500 uppercase tracking-widest" htmlFor="modal-prod-brand-input">Brand</label>
                   <input
                     id="modal-prod-brand-input"
@@ -601,6 +676,21 @@ const AdminDashboard = () => {
                   >
                     {categories.map(c => (
                       <option key={c.categoryId} value={c.categoryId}>{c.categoryName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-bold text-slate-500 uppercase tracking-widest" htmlFor="modal-prod-subcat-select">Subcategory</label>
+                  <select
+                    id="modal-prod-subcat-select"
+                    value={productForm.subCategoryId}
+                    onChange={(e) => setProductForm({ ...productForm, subCategoryId: e.target.value })}
+                    className="bg-slate-900 border border-slate-850 rounded-xl p-2.5 text-slate-300 focus:outline-none"
+                    required
+                  >
+                    <option value="">Select Subcategory</option>
+                    {subCategories.filter(sc => sc.categoryId === productForm.categoryId).map(sc => (
+                      <option key={sc.subCategoryId} value={sc.subCategoryId}>{sc.subCategoryName}</option>
                     ))}
                   </select>
                 </div>

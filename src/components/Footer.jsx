@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="border-t border-slate-200 dark:border-slate-900 bg-white/80 dark:bg-slate-950/80 px-4 sm:px-8 py-10 mt-20 transition-colors duration-300">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-        
+
         {/* Brand Column */}
         <div className="flex flex-col gap-3">
           <span className="text-xl font-extrabold tracking-wider bg-gradient-to-r from-indigo-400 to-indigo-500 bg-clip-text text-transparent">
